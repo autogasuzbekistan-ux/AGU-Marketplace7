@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyurtmalar - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .logo h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link span {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .user-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .user-info p {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-processing {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-shipped {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge-delivered {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #138496;
+        }
+
+        .btn-status {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-status:hover {
+            background: #218838;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .btn-close:hover {
+            color: #333;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-items {
+            margin: 20px 0;
+        }
+
+        .order-items h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-item-info {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .order-item-price {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .order-total {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .order-total h3 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .status-change-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .status-change-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar .logo p,
+            .sidebar .nav-link span:not(:first-child),
+            .sidebar .user-info p {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 15px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .order-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>🚗 AutoGas</h2>
+                <p>Admin Panel</p>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">
+                        <span>📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="kontragents.html" class="nav-link">
+                        <span>🏪</span>
+                        <span>Kontragentlar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="products.html" class="nav-link">
+                        <span>📦</span>
+                        <span>Mahsulotlar</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="orders.html" class="nav-link active">
+                        <span>🛒</span>
+                        <span>Buyurtmalar</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="user-info">
+                <p><strong id="userName">...</strong></p>
+                <p style="font-size: 12px; opacity: 0.8;" id="userEmail">...</p>
+                <button class="btn-logout" onclick="logout()">🚪 Chiqish</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>Buyurtmalar</h1>
+                <p>Sizning viloyatingiz buyurtmalari</p>
+            </div>
+
+            <div class="filter-section">
+                <label>Status:</label>
+                <select id="statusFilter" onchange="filterOrders()">
+                    <option value="">Barcha statuslar</option>
+                    <option value="new">Yangi</option>
+                    <option value="processing">Jarayonda</option>
+                    <option value="shipped">Yuborilgan</option>
+                    <option value="delivered">Yetkazildi</option>
+                    <option value="cancelled">Bekor qilindi</option>
+                </select>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <div id="loadingContainer" class="loading">
+                <div class="spinner"></div>
+                <p>Buyurtmalar yuklanmoqda...</p>
+            </div>
+
+            <div id="tableContainer" style="display: none;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Mijoz</th>
+                                <th>Telefon</th>
+                                <th>Manzil</th>
+                                <th>Jami summa</th>
+                                <th>Status</th>
+                                <th>Sana</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🛒</div>
+                <h3>Buyurtmalar topilmadi</h3>
+                <p>Hech qanday buyurtma mavjud emas</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- View Order Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Buyurtma #<span id="modalOrderId">...</span></h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <p class="info-label">Mijoz</p>
+                    <p class="info-value" id="modalCustomerName">-</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Telefon</p>
+                    <p class="info-value" id="modalPhone">-</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Email</p>
+                    <p class="info-value" id="modalEmail">-</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Viloyat</p>
+                    <p class="info-value" id="modalRegion">-</p>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <p class="info-label">Manzil</p>
+                    <p class="info-value" id="modalAddress">-</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Status</p>
+                    <p class="info-value" id="modalStatus">-</p>
+                </div>
+                <div class="info-item">
+                    <p class="info-label">Buyurtma sanasi</p>
+                    <p class="info-value" id="modalDate">-</p>
+                </div>
+            </div>
+
+            <div class="order-items">
+                <h3>Buyurtma mahsulotlari:</h3>
+                <div id="modalItems">
+                    <!-- Items will be loaded here -->
+                </div>
+            </div>
+
+            <div class="order-total">
+                <p style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">Jami summa:</p>
+                <h3 id="modalTotalPrice">0 so'm</h3>
+            </div>
+
+            <div class="status-change-section">
+                <h4>Status o'zgartirish</h4>
+                <div class="form-group">
+                    <label for="newStatus">Yangi status:</label>
+                    <select id="newStatus">
+                        <option value="new">Yangi</option>
+                        <option value="processing">Jarayonda</option>
+                        <option value="shipped">Yuborilgan</option>
+                        <option value="delivered">Yetkazildi</option>
+                        <option value="cancelled">Bekor qilindi</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="updateOrderStatus()">Statusni yangilash</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api';
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        // Check authentication
+        if (!token || user.role !== 'admin') {
+            window.location.href = '../index.html';
+        }
+
+        // Set user info
+        document.getElementById('userName').textContent = user.name || 'Admin';
+        document.getElementById('userEmail').textContent = user.email || '';
+
+        let orders = [];
+        let filteredOrders = [];
+        let currentOrderId = null;
+
+        // Load orders
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/admin/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Buyurtmalarni yuklashda xatolik');
+
+                orders = await response.json();
+                filteredOrders = orders;
+
+                document.getElementById('loadingContainer').style.display = 'none';
+
+                if (orders.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                } else {
+                    document.getElementById('tableContainer').style.display = 'block';
+                    renderOrders();
+                }
+
+            } catch (error) {
+                console.error('Load error:', error);
+                document.getElementById('loadingContainer').style.display = 'none';
+                showAlert(error.message, 'error');
+            }
+        }
+
+        // Render orders
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">Hech narsa topilmadi</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredOrders.map(o => {
+                let statusBadge = '';
+                if (o.status === 'new') statusBadge = '<span class="badge badge-new">Yangi</span>';
+                else if (o.status === 'processing') statusBadge = '<span class="badge badge-processing">Jarayonda</span>';
+                else if (o.status === 'shipped') statusBadge = '<span class="badge badge-shipped">Yuborilgan</span>';
+                else if (o.status === 'delivered') statusBadge = '<span class="badge badge-delivered">Yetkazildi</span>';
+                else if (o.status === 'cancelled') statusBadge = '<span class="badge badge-cancelled">Bekor qilindi</span>';
+
+                const date = new Date(o.created_at).toLocaleDateString('uz-UZ');
+
+                return `
+                    <tr>
+                        <td>#${o.id}</td>
+                        <td>${o.customer_name || 'N/A'}</td>
+                        <td>${o.phone || 'N/A'}</td>
+                        <td>${o.address || 'N/A'}</td>
+                        <td>${parseFloat(o.total_price || 0).toLocaleString('uz-UZ')} so'm</td>
+                        <td>${statusBadge}</td>
+                        <td>${date}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn-sm btn-view" onclick="viewOrder(${o.id})">👁️ Ko'rish</button>
+                                <button class="btn-sm btn-status" onclick="quickStatus(${o.id})">🔄 Status</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Filter orders
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+
+            filteredOrders = orders.filter(o => {
+                return !status || o.status === status;
+            });
+
+            renderOrders();
+        }
+
+        // View order
+        async function viewOrder(id) {
+            try {
+                const response = await fetch(`${API_URL}/orders/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) throw new Error('Buyurtma ma\'lumotlarini yuklashda xatolik');
+
+                const order = await response.json();
+                currentOrderId = id;
+
+                document.getElementById('modalOrderId').textContent = order.id;
+                document.getElementById('modalCustomerName').textContent = order.customer_name || 'N/A';
+                document.getElementById('modalPhone').textContent = order.phone || 'N/A';
+                document.getElementById('modalEmail').textContent = order.email || 'N/A';
+                document.getElementById('modalRegion').textContent = order.region || 'N/A';
+                document.getElementById('modalAddress').textContent = order.address || 'N/A';
+                document.getElementById('modalStatus').textContent = getStatusText(order.status);
+                document.getElementById('modalDate').textContent = new Date(order.created_at).toLocaleString('uz-UZ');
+                document.getElementById('modalTotalPrice').textContent = parseFloat(order.total_price || 0).toLocaleString('uz-UZ') + ' so\'m';
+                document.getElementById('newStatus').value = order.status;
+
+                // Render items
+                const itemsHtml = order.items ? order.items.map(item => `
+                    <div class="order-item">
+                        <div class="order-item-info">
+                            <div class="order-item-name">${item.product?.name || 'Mahsulot'}</div>
+                            <div class="order-item-price">
+                                ${item.quantity} x ${parseFloat(item.price || 0).toLocaleString('uz-UZ')} so'm
+                            </div>
+                        </div>
+                        <div style="font-weight: 600;">
+                            ${parseFloat(item.quantity * item.price).toLocaleString('uz-UZ')} so'm
+                        </div>
+                    </div>
+                `).join('') : '<p style="color: #999;">Mahsulotlar topilmadi</p>';
+
+                document.getElementById('modalItems').innerHTML = itemsHtml;
+
+                document.getElementById('viewModal').classList.add('active');
+
+            } catch (error) {
+                console.error('View error:', error);
+                showAlert(error.message, 'error');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('viewModal').classList.remove('active');
+            currentOrderId = null;
+        }
+
+        // Quick status change
+        function quickStatus(id) {
+            viewOrder(id);
+        }
+
+        // Update order status
+        async function updateOrderStatus() {
+            if (!currentOrderId) return;
+
+            const newStatus = document.getElementById('newStatus').value;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/orders/${currentOrderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Status muvaffaqiyatli yangilandi!', 'success');
+                    closeModal();
+                    loadOrders();
+                } else {
+                    showAlert(data.message || 'Xatolik yuz berdi', 'error');
+                }
+            } catch (error) {
+                console.error('Update error:', error);
+                showAlert('Server bilan bog\'lanishda xatolik!', 'error');
+            }
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            const statusMap = {
+                'new': 'Yangi',
+                'processing': 'Jarayonda',
+                'shipped': 'Yuborilgan',
+                'delivered': 'Yetkazildi',
+                'cancelled': 'Bekor qilindi'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Tizimdan chiqmoqchimisiz?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '../index.html';
+            }
+        }
+
+        // Load orders on page load
+        window.addEventListener('load', loadOrders);
+    </script>
+</body>
+</html>

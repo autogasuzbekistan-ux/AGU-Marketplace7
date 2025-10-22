@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyurtmalar - Sotuvchi Paneli</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --primary-blue: #1b5bb5;
+            --secondary-orange: #ed8f36;
+            --accent-red: #E30613;
+        }
+        
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+        
+        .order-card {
+            transition: all 0.3s ease;
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-new { background: #DBEAFE; color: #1E40AF; }
+        .status-processing { background: #FEF3C7; color: #92400E; }
+        .status-shipped { background: #E0E7FF; color: #3730A3; }
+        .status-delivered { background: #D1FAE5; color: #065F46; }
+        .status-cancelled { background: #FEE2E2; color: #991B1B; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    
+    <!-- Toast -->
+    <div id="toast" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-6 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-500 z-50">
+        <span id="toast-message"></span>
+    </div>
+    
+    <div class="flex min-h-screen">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed md:static w-64 bg-white shadow-lg z-40 min-h-screen">
+            <div class="p-6">
+                <!-- Logo -->
+                <div class="text-center mb-8">
+                    <div class="text-3xl font-bold">
+                        <span style="color: #E30613;">AG</span><span style="color: #0B3373;">U</span><sup style="color: #0B3373; font-size: 1rem;">®</sup>
+                    </div>
+                    <div class="text-xs font-bold" style="color: #0B3373; margin-top: -5px;">Auto Gas Uzbekistan</div>
+                </div>
+                
+                <!-- User Info -->
+                <div class="mb-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 text-white font-bold text-lg">
+                            <span id="user-initial">S</span>
+                        </div>
+                        <div>
+                            <div class="font-semibold text-gray-800" id="user-name">Sotuvchi</div>
+                            <div class="text-xs text-gray-500">Kontragent</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="space-y-2">
+                    <a href="dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="orders.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-600 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span>Buyurtmalar</span>
+                    </a>
+                    
+                    <a href="products.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                        </svg>
+                        <span>Mahsulotlar</span>
+                    </a>
+                    
+                    <button id="logout-btn" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 font-medium w-full">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        <span>Chiqish</span>
+                    </button>
+                </nav>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Buyurtmalar</h1>
+                    <p class="text-gray-600 mt-1">Barcha buyurtmalarni ko'ring va boshqaring</p>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg bg-white shadow-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Filter and Search -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Buyurtma qidirish (mijoz nomi, telefon...)" 
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    
+                    <select id="status-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Barcha holat</option>
+                        <option value="new">Yangi</option>
+                        <option value="processing">Tayyorlanmoqda</option>
+                        <option value="shipped">Yo'lda</option>
+                        <option value="delivered">Yetkazildi</option>
+                        <option value="cancelled">Bekor qilindi</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Orders List -->
+            <div id="orders-container" class="space-y-4">
+                <!-- Loading -->
+                <div class="text-center py-12">
+                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p class="text-gray-600 mt-4">Buyurtmalar yuklanmoqda...</p>
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Order Detail Modal -->
+    <div id="order-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Buyurtma Tafsilotlari</h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="order-detail-content" class="p-6">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        let authToken = localStorage.getItem('seller_token');
+        let allOrders = [];
+        
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.className = `fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-lg transform transition-transform duration-500 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            toast.classList.remove('translate-x-[120%]');
+            toast.classList.add('translate-x-0');
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-[120%]');
+            }, 4000);
+        }
+        
+        function checkAuth() {
+            if (!authToken) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            const userStr = localStorage.getItem('seller_user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                document.getElementById('user-name').textContent = user.name;
+                document.getElementById('user-initial').textContent = user.name.charAt(0).toUpperCase();
+            }
+            return true;
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'new': 'Yangi',
+                'processing': 'Tayyorlanmoqda',
+                'shipped': "Yo'lda",
+                'delivered': 'Yetkazildi',
+                'cancelled': 'Bekor qilindi'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function getStatusClass(status) {
+            return `status-${status}`;
+        }
+        
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/kontragent/sales`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Buyurtmalarni yuklashda xatolik');
+                
+                allOrders = await response.json();
+                renderOrders(allOrders);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('orders-container').innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-red-500 text-lg font-semibold">Xatolik yuz berdi</div>
+                        <p class="text-gray-600 mt-2">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-container');
+            
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-xl">
+                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <p class="text-gray-600 text-lg">Hozircha buyurtmalar yo'q</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => `
+                <div class="order-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="showOrderDetail(${order.id})">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="status-badge ${getStatusClass(order.status)}">${getStatusText(order.status)}</span>
+                                <span class="text-sm text-gray-500">#${order.id}</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-1">${order.customer_name}</h3>
+                            <p class="text-sm text-gray-600">${order.customer_phone || 'N/A'}</p>
+                            <p class="text-sm text-gray-500 mt-1">${order.region || 'N/A'}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-blue-600 mb-1">$${parseFloat(order.total_price).toFixed(2)}</div>
+                            <div class="text-sm text-gray-500">${new Date(order.created_at).toLocaleDateString('uz-UZ')}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function filterOrders() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            
+            let filtered = allOrders;
+            
+            if (searchTerm) {
+                filtered = filtered.filter(order => 
+                    order.customer_name.toLowerCase().includes(searchTerm) ||
+                    (order.customer_phone && order.customer_phone.includes(searchTerm)) ||
+                    (order.region && order.region.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(order => order.status === statusFilter);
+            }
+            
+            renderOrders(filtered);
+        }
+        
+        async function showOrderDetail(orderId) {
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const modal = document.getElementById('order-modal');
+            const content = document.getElementById('order-detail-content');
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-600">Mijoz</label>
+                            <p class="font-semibold text-gray-800">${order.customer_name}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Telefon</label>
+                            <p class="font-semibold text-gray-800">${order.customer_phone || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Viloyat</label>
+                            <p class="font-semibold text-gray-800">${order.region || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Holat</label>
+                            <p><span class="status-badge ${getStatusClass(order.status)}">${getStatusText(order.status)}</span></p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-sm text-gray-600">Manzil</label>
+                            <p class="font-semibold text-gray-800">${order.address || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="font-bold text-lg text-gray-800 mb-4">Mahsulotlar</h3>
+                        <div class="space-y-3">
+                            ${order.items ? order.items.map(item => `
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${item.product?.name || 'N/A'}</p>
+                                        <p class="text-sm text-gray-600">Miqdor: ${item.quantity}</p>
+                                    </div>
+                                    <p class="font-bold text-gray-800">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                                </div>
+                            `).join('') : '<p class="text-gray-500">Mahsulotlar mavjud emas</p>'}
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-gray-800">Jami:</span>
+                            <span class="text-2xl font-bold text-blue-600">$${parseFloat(order.total_price).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // Event Listeners
+        document.getElementById('search-input').addEventListener('input', filterOrders);
+        document.getElementById('status-filter').addEventListener('change', filterOrders);
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('order-modal').classList.add('hidden');
+        });
+        
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API_BASE_URL}/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'application/json' }
+                });
+            } catch (e) {}
+            localStorage.removeItem('seller_token');
+            localStorage.removeItem('seller_user');
+            window.location.href = 'login.html';
+        });
+        
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Make showOrderDetail global
+        window.showOrderDetail = showOrderDetail;
+        
+        // Initialize
+        if (checkAuth()) {
+            loadOrders();
+        }
+    </script>
+</body>
+</html>

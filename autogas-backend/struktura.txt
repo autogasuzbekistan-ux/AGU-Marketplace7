@@ -1,0 +1,33 @@
+ Volume in drive C is Windows 10
+ Volume Serial Number is 5A1D-9E27
+
+ Directory of C:\laragon\www\autogas-backend
+
+19.10.2025  13:26    <DIR>          .
+19.10.2025  13:26    <DIR>          ..
+15.10.2025  17:56               252 .editorconfig
+16.10.2025  13:57             1 257 .env
+15.10.2025  17:56             1 084 .env.example
+15.10.2025  17:56               186 .gitattributes
+15.10.2025  17:56               283 .gitignore
+18.10.2025  15:21             1 798 .phpunit.result.cache
+15.10.2025  17:56    <DIR>          app
+15.10.2025  17:56               425 artisan
+15.10.2025  17:56    <DIR>          bootstrap
+18.10.2025  11:32             2 871 composer.json
+18.10.2025  11:32           311 021 composer.lock
+18.10.2025  11:32    <DIR>          config
+16.10.2025  12:48    <DIR>          database
+15.10.2025  17:56               415 package.json
+15.10.2025  17:56             1 228 phpunit.xml
+15.10.2025  17:56    <DIR>          public
+15.10.2025  17:56             3 929 README.md
+15.10.2025  17:56    <DIR>          resources
+16.10.2025  13:40    <DIR>          routes
+15.10.2025  17:56    <DIR>          storage
+19.10.2025  13:26                 0 struktura.txt
+15.10.2025  17:56    <DIR>          tests
+18.10.2025  11:32    <DIR>          vendor
+15.10.2025  17:56               331 vite.config.js
+              14 File(s)        325 080 bytes
+              12 Dir(s)  346 855 727 104 bytes free
